@@ -286,6 +286,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   viewer: {fileID: 1805310010}
+  mapMaterial: {fileID: 2100000, guid: 57aece13b1c43d54c85b0623ad83e4b4, type: 2}
 --- !u!43 &515606159
 Mesh:
   m_ObjectHideFlags: 0
