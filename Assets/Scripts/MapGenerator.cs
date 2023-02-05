@@ -11,7 +11,12 @@ public class MapGenerator : MonoBehaviour {
 
 	public Noise.NormalizeMode normalizeMode;
 
-	public const int mapChunkSize = 239;
+	//239 (240) works for flatShading=0;
+	//95 (96) works for flatShading=1;
+	public const int mapChunkSize = 95;
+
+	public bool useFlatShading;
+
 	[Range(0,6)]
 	public int editorPreviewLOD;
 	public float noiseScale;
@@ -50,7 +55,7 @@ public class MapGenerator : MonoBehaviour {
 		} else if (drawMode == DrawMode.ColourMap) {
 			display.DrawTexture (TextureGenerator.TextureFromColourMap (mapData.colourMap, mapChunkSize, mapChunkSize));
 		} else if (drawMode == DrawMode.Mesh) {
-			display.DrawMesh (MeshGenerator.GenerateTerrainMesh (mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD), TextureGenerator.TextureFromColourMap (mapData.colourMap, mapChunkSize, mapChunkSize));
+			display.DrawMesh (MeshGenerator.GenerateTerrainMesh (mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD, useFlatShading), TextureGenerator.TextureFromColourMap (mapData.colourMap, mapChunkSize, mapChunkSize));
 		} else if( drawMode == DrawMode.FalloffMap) {
 			display.DrawTexture(TextureGenerator.TextureFromHeightMap(FalloffGenerator.GenerateFalloffMap(mapChunkSize)));
 		}
@@ -80,7 +85,7 @@ public class MapGenerator : MonoBehaviour {
 	}
 
 	void MeshDataThread(MapData mapData, int lod, Action<MeshData> callback) {
-		MeshData meshData = MeshGenerator.GenerateTerrainMesh (mapData.heightMap, meshHeightMultiplier, meshHeightCurve, lod);
+		MeshData meshData = MeshGenerator.GenerateTerrainMesh (mapData.heightMap, meshHeightMultiplier, meshHeightCurve, lod, useFlatShading);
 		lock (meshDataThreadInfoQueue) {
 			meshDataThreadInfoQueue.Enqueue (new MapThreadInfo<MeshData> (callback, meshData));
 		}

@@ -3,7 +3,7 @@ using System.Collections;
 
 public static class MeshGenerator {
 
-	public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve, int levelOfDetail) {
+	public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve, int levelOfDetail, bool useFlatShading) {
 		AnimationCurve heightCurve = new AnimationCurve(_heightCurve.keys);
 
 		int meshSimplificationIncrement = (levelOfDetail ==0)?1:levelOfDetail * 2;
@@ -17,7 +17,7 @@ public static class MeshGenerator {
 		
 		int vtxPerLine = (meshSize - 1)/meshSimplificationIncrement + 1;	
 
-		MeshData meshData = new MeshData (vtxPerLine);
+		MeshData meshData = new MeshData (vtxPerLine, useFlatShading);
 
 		int[,] vtxIdxMap = new int[bordedSize,bordedSize];
 		int meshVtxIdx = 0;
@@ -59,7 +59,7 @@ public static class MeshGenerator {
 			}
 		}
 
-		meshData.BakeNormals();
+		meshData.ProcessMesh();
 		return meshData;
 
 	}
@@ -76,7 +76,10 @@ public class MeshData {
 	int triIdx;
 	int borderTriIdx;
 
-	public MeshData(int vtxPerLine) {
+	bool useFlatShading;
+
+	public MeshData(int vtxPerLine, bool useFlatShading) {
+		this.useFlatShading = useFlatShading;
 		vertices = new Vector3[vtxPerLine * vtxPerLine];
 		uvs = new Vector2[vtxPerLine * vtxPerLine];
 		triangles = new int[(vtxPerLine-1)*(vtxPerLine-1)*6];
@@ -170,8 +173,30 @@ public class MeshData {
 
 	}
 
-	public void BakeNormals() {
+	public void ProcessMesh() {
+		if(useFlatShading) {
+			FlatShading();
+		} else {
+			BakeNormals();
+		}
+	}
+	void BakeNormals() {
 		bakedNormals = CalculateNormals();
+	}
+
+	void FlatShading() {
+		Vector3[] flatShadedVtx = new Vector3[triangles.Length];
+		Vector2[] flatShadedUvs = new Vector2[triangles.Length];	
+
+		for (int i=0; i<triangles.Length; i++) {
+			flatShadedVtx[i] = vertices[triangles[i]];
+			flatShadedUvs[i] = uvs[triangles[i]];
+			triangles[i] = i;
+		}
+
+		vertices = flatShadedVtx;
+		uvs = flatShadedUvs;
+
 	}
 
 	public Mesh CreateMesh() {
@@ -179,9 +204,12 @@ public class MeshData {
 		mesh.vertices = vertices;
 		mesh.triangles = triangles;
 		mesh.uv = uvs;
-		//mesh.normals = CalculateNormals();
-		//mesh.RecalculateNormals();
-		mesh.normals = bakedNormals;
+
+		if(useFlatShading) {
+			mesh.RecalculateNormals();
+		} else {
+			mesh.normals = bakedNormals;
+		}
 		return mesh;
 	}
 
