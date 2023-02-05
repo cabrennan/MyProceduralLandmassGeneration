@@ -13,7 +13,7 @@ public class MapGenerator : MonoBehaviour {
 
 	//239 (240) works for flatShading=0;
 	//95 (96) works for flatShading=1;
-	public const int mapChunkSize = 95;
+	//public const int mapChunkSize = 95;
 
 	public bool useFlatShading;
 
@@ -37,6 +37,7 @@ public class MapGenerator : MonoBehaviour {
 	public bool autoUpdate;
 
 	public TerrainType[] regions;
+	static MapGenerator instance;
 
 	float[,] falloffMap;
 
@@ -45,6 +46,19 @@ public class MapGenerator : MonoBehaviour {
 
 	void Awake() {
 		falloffMap = FalloffGenerator.GenerateFalloffMap(mapChunkSize);
+	}
+
+	public static int mapChunkSize {
+		get {
+			if(instance == null) {
+				instance = FindObjectOfType<MapGenerator>();
+			}
+			if(instance.useFlatShading) {
+				return 95;
+			} else {
+				return 239;
+			}
+		}
 	}
 	public void DrawMapInEditor() {
 		MapData mapData = GenerateMapData (Vector2.zero);
