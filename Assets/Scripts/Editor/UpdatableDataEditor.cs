@@ -14,6 +14,7 @@ public class UpdatableDataEditor: Editor {
 
         if(GUILayout.Button("Update")){
             data.NotifyUpdatedValues();
+            EditorUtility.SetDirty(target); // tell unity to update when settings changed
         }
     }
 

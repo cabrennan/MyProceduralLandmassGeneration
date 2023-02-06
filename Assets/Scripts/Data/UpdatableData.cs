@@ -11,10 +11,14 @@ public class UpdatableData : ScriptableObject {
     protected virtual void OnValidate() {
         // on change to inspector value
         if(autoUpdate) {
-            NotifyUpdatedValues();
+            // Because shader compiles after heights are set - so it's not receiving values (all white terrain)
+            UnityEditor.EditorApplication.update += NotifyUpdatedValues;
+            
         }        
     }
     public void NotifyUpdatedValues() {
+        // Unsubscribe so it's not called ever frame
+        UnityEditor.EditorApplication.update  -= NotifyUpdatedValues;
         if(OnValuesUpdated != null) {
             OnValuesUpdated(); 
         }
