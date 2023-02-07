@@ -8,12 +8,13 @@ public class UpdatableData : ScriptableObject {
 
     public bool autoUpdate;
 
+    #if UNITY_EDITOR
+
     protected virtual void OnValidate() {
         // on change to inspector value
         if(autoUpdate) {
             // Because shader compiles after heights are set - so it's not receiving values (all white terrain)
             UnityEditor.EditorApplication.update += NotifyUpdatedValues;
-            
         }        
     }
     public void NotifyUpdatedValues() {
@@ -22,6 +23,7 @@ public class UpdatableData : ScriptableObject {
         if(OnValuesUpdated != null) {
             OnValuesUpdated(); 
         }
-
     }
+
+    #endif
 }
