@@ -3,13 +3,7 @@ using System.Collections;
 
 public static class MeshGenerator {	
 
-	public const int numSupportedLOD = 5;
-	public const int numSupportedChunkSizes = 9;
-	public const int numSuppportedFlatShadedChunkSizes = 3;
-	public static readonly int[] supportedChunkSizes = { 48, 72, 96, 120, 144, 168, 192, 216, 240 };
-	public static readonly int[] supportedFlatShadedChunkSizes = { 48, 72, 96 };
-	public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve, int levelOfDetail, bool useFlatShading) {
-		AnimationCurve heightCurve = new AnimationCurve(_heightCurve.keys);
+	public static MeshData GenerateTerrainMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail) {
 
 		int meshSimplificationIncrement = (levelOfDetail ==0)?1:levelOfDetail * 2;
 		int bordedSize = heightMap.GetLength (0);
@@ -22,7 +16,7 @@ public static class MeshGenerator {
 		
 		int vtxPerLine = (meshSize - 1)/meshSimplificationIncrement + 1;	
 
-		MeshData meshData = new MeshData (vtxPerLine, useFlatShading);
+		MeshData meshData = new MeshData (vtxPerLine, meshSettings.useFlatShading);
 
 		int[,] vtxIdxMap = new int[bordedSize,bordedSize];
 		int meshVtxIdx = 0;
@@ -46,8 +40,8 @@ public static class MeshGenerator {
 
 				int vtxIdx = vtxIdxMap[x,y];
 				Vector2 pct = new Vector2 ((x - meshSimplificationIncrement) / (float)meshSize, (y - meshSimplificationIncrement) / (float)meshSize);
-				float height = heightCurve.Evaluate(heightMap[x,y]) * heightMultiplier;
-				Vector3 vtxPos = new Vector3 (topLeftX + pct.x * meshSizeUnsimp, height, topLeftZ - pct.y * meshSizeUnsimp);
+				float height = heightMap[x,y];
+				Vector3 vtxPos = new Vector3 ((topLeftX + pct.x * meshSizeUnsimp) * meshSettings.meshScale, height, (topLeftZ - pct.y * meshSizeUnsimp) * meshSettings.meshScale);
 				
 				meshData.AddVtx(vtxPos, pct, vtxIdx);
 
